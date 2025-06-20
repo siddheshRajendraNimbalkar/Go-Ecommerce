@@ -14,9 +14,8 @@ type Config struct {
 
 func LoadConfig() (config *Config, err error) {
 
-	godotenv.Load()
 	if strings.ToLower(os.Getenv("APP_ENV")) == "dev" {
-		fmt.Println("Running in dev mode")
+		godotenv.Load()
 	}
 
 	httpPort := os.Getenv("HTTP_PORT")
