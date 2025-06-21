@@ -3,15 +3,21 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/api/rest"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/dto"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/service"
 )
 
 type UserRoute struct {
+	svc service.UserService
 }
 
 func SetupUserRoutes(r *rest.RestRoutes) {
 	app := r.App
 
-	handler := &UserRoute{}
+	svc := service.UserService{}
+	handler := &UserRoute{
+		svc: svc,
+	}
 
 	// unAuthenticated routes
 	app.Post("/register", handler.Register)
@@ -34,8 +40,22 @@ func SetupUserRoutes(r *rest.RestRoutes) {
 
 func (u *UserRoute) Register(ctx *fiber.Ctx) error {
 
+	user := dto.UserSignup{}
+	if err := ctx.BodyParser(&user); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid input data",
+		})
+	}
+
+	token, err := u.svc.Signup(user)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "error on signup",
+		})
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "User is registered successfully",
+		"message": token,
 	})
 }
 
