@@ -7,6 +7,9 @@ import (
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/configs"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/api/rest"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/api/rest/routes"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/domain"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Server struct {
@@ -18,8 +21,20 @@ func NewServer(config configs.Config) *Server {
 
 	fiberApp := fiber.New()
 
+	db, err := gorm.Open(postgres.Open(config.Dsn), &gorm.Config{})
+
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	log.Printf("Connected to database successfully")
+
+	// Migrate the schema
+	db.AutoMigrate(&domain.User{})
+
 	r := rest.RestRoutes{
 		App: fiberApp,
+		DB:  db,
 	}
 
 	SetupRoutes(&r)

@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	Port string
+	Dsn  string
 }
 
 func LoadConfig() (config *Config, err error) {
@@ -24,8 +25,14 @@ func LoadConfig() (config *Config, err error) {
 		return nil, fmt.Errorf("port address not found")
 	}
 
+	dsn := os.Getenv("DSN")
+	if len(dsn) < 1 {
+		return nil, fmt.Errorf("dsn not found")
+	}
+
 	return &Config{
 		Port: httpPort,
+		Dsn:  dsn,
 	}, nil
 
 }
