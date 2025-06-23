@@ -55,7 +55,7 @@ func (u *UserRoute) Register(ctx *fiber.Ctx) error {
 	token, err := u.svc.Signup(user)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "error on signup",
+			"error": err.Error(),
 		})
 	}
 

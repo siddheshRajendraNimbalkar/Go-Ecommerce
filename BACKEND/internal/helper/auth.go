@@ -2,6 +2,7 @@ package helper
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -59,7 +60,7 @@ func (a Auth) GenerateToken(id uint, email string, role string) (string, error) 
 		return "", errors.New("invalid user details for token generation")
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": id,
 		"email":   email,
 		"role":    role,
@@ -69,7 +70,7 @@ func (a Auth) GenerateToken(id uint, email string, role string) (string, error) 
 	tokenString, err := token.SignedString([]byte(a.Secret))
 
 	if err != nil {
-		return "", errors.New("failed to sign token")
+		return "", fmt.Errorf("failed to sign token: %v", err)
 	}
 
 	return tokenString, nil

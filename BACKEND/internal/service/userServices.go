@@ -27,21 +27,23 @@ func (s UserService) findUserByEmail(email string) (*domain.User, error) {
 }
 
 func (s UserService) Signup(input dto.UserSignup) (string, error) {
-	log.Println(input)
+
+	hPassword, err := s.Auth.CreateHashPassword(input.Password)
+	if err != nil {
+		return "", fmt.Errorf("error while hashing password: %w", err)
+	}
 
 	user, err := s.Repo.CreateUser(domain.User{
 		Email:    input.Email,
-		Password: input.Password,
+		Password: hPassword,
 		Phone:    input.Phone,
 	})
 
-	// Create Tocken
+	if err != nil {
+		return "", fmt.Errorf("error while creating user: %w", err)
+	}
 
-	log.Println("User", user)
-
-	userInfo := fmt.Sprintf("%v %v %v", user.ID, user.Email, user.Phone)
-
-	return userInfo, err
+	return s.Auth.GenerateToken(user.ID, user.Email, user.UserType)
 }
 
 func (s UserService) Login(email string, password string) (string, error) {
@@ -53,7 +55,15 @@ func (s UserService) Login(email string, password string) (string, error) {
 		return "", fmt.Errorf("error while finding user by email: %w", err)
 	}
 
-	return user.Email, nil
+	isVeriy, err := s.Auth.VerifyPassword(password, user.Password)
+
+	if err != nil || !isVeriy {
+		return "", fmt.Errorf("error while verifying password: %w", err)
+	}
+
+	// Generate Token
+
+	return s.Auth.GenerateToken(user.ID, user.Email, user.UserType)
 }
 
 func (s UserService) GetVerificationCode(e domain.User) (int, error) {
