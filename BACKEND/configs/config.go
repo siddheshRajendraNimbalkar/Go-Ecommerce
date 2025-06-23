@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	Port string
-	Dsn  string
+	Port      string
+	Dsn       string
+	AppSecret string
 }
 
 func LoadConfig() (config *Config, err error) {
@@ -30,9 +31,15 @@ func LoadConfig() (config *Config, err error) {
 		return nil, fmt.Errorf("dsn not found")
 	}
 
+	AppSecret := os.Getenv("APPSECRET")
+	if len(AppSecret) < 1 {
+		return nil, fmt.Errorf("app secret not found")
+	}
+
 	return &Config{
-		Port: httpPort,
-		Dsn:  dsn,
+		Port:      httpPort,
+		Dsn:       dsn,
+		AppSecret: AppSecret,
 	}, nil
 
 }

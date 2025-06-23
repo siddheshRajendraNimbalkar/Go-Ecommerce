@@ -8,6 +8,7 @@ import (
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/api/rest"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/api/rest/routes"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/domain"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/helper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -32,9 +33,12 @@ func NewServer(config configs.Config) *Server {
 	// Migrate the schema
 	db.AutoMigrate(&domain.User{})
 
+	auth := helper.NewAuth(config.AppSecret)
+
 	r := rest.RestRoutes{
-		App: fiberApp,
-		DB:  db,
+		App:  fiberApp,
+		DB:   db,
+		Auth: auth,
 	}
 
 	SetupRoutes(&r)

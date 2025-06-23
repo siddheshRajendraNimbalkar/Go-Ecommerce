@@ -6,11 +6,13 @@ import (
 
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/domain"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/dto"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/helper"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/repository"
 )
 
 type UserService struct {
 	Repo repository.UserRepository
+	Auth helper.Auth
 }
 
 func (s UserService) findUserByEmail(email string) (*domain.User, error) {

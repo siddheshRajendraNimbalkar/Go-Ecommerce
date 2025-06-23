@@ -15,6 +15,15 @@ type Auth struct {
 	Secret string
 }
 
+func NewAuth(secret string) Auth {
+	if secret == "" {
+		return Auth{}
+	}
+	return Auth{
+		Secret: secret,
+	}
+}
+
 func (a Auth) CreateHashPassword(password string) (string, error) {
 
 	if len(password) < 6 {
