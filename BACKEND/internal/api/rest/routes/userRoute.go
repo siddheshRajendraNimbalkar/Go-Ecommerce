@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/api/rest"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/dto"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/repository"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/service"
 )
 
@@ -14,7 +15,10 @@ type UserRoute struct {
 func SetupUserRoutes(r *rest.RestRoutes) {
 	app := r.App
 
-	svc := service.UserService{}
+	svc := service.UserService{
+		Repo: repository.NewUserRepository(r.DB),
+	}
+
 	handler := &UserRoute{
 		svc: svc,
 	}
@@ -61,8 +65,24 @@ func (u *UserRoute) Register(ctx *fiber.Ctx) error {
 
 func (u *UserRoute) Login(ctx *fiber.Ctx) error {
 
+	LoginInput := dto.UserLogin{}
+	err := ctx.BodyParser(&LoginInput)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid input data",
+		})
+	}
+
+	token, err := u.svc.Login(LoginInput.Email, LoginInput.Password)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "error on login",
+		})
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "User is logged in successfully",
+		"message": "Login successful",
+		"token":   token,
 	})
 }
 

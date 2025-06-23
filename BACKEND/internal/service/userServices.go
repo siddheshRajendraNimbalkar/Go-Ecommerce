@@ -1,28 +1,57 @@
 package service
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/domain"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/dto"
+	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/repository"
 )
 
 type UserService struct {
+	Repo repository.UserRepository
 }
 
 func (s UserService) findUserByEmail(email string) (*domain.User, error) {
 
-	return nil, nil
+	user, err := s.Repo.FindUser(email)
+	if err != nil {
+		log.Println("[ERROR IN SERVICE] Error while finding user by email:", err)
+		return nil, fmt.Errorf("error while finding user by email: %w", err)
+	}
+
+	return &user, nil
 }
 
-func (s UserService) Signup(input any) (string, error) {
+func (s UserService) Signup(input dto.UserSignup) (string, error) {
 	log.Println(input)
 
-	return "this is my token", nil
+	user, err := s.Repo.CreateUser(domain.User{
+		Email:    input.Email,
+		Password: input.Password,
+		Phone:    input.Phone,
+	})
+
+	// Create Tocken
+
+	log.Println("User", user)
+
+	userInfo := fmt.Sprintf("%v %v %v", user.ID, user.Email, user.Phone)
+
+	return userInfo, err
 }
 
-func (s UserService) Login(input any) (string, error) {
+func (s UserService) Login(email string, password string) (string, error) {
 
-	return "", nil
+	user, err := s.findUserByEmail(email)
+
+	if err != nil {
+		log.Println("[ERROR IN SERVICE] Error while finding user by email:", err)
+		return "", fmt.Errorf("error while finding user by email: %w", err)
+	}
+
+	return user.Email, nil
 }
 
 func (s UserService) GetVerificationCode(e domain.User) (int, error) {
