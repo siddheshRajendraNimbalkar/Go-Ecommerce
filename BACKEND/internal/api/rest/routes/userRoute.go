@@ -24,22 +24,25 @@ func SetupUserRoutes(r *rest.RestRoutes) {
 		svc: svc,
 	}
 
+	pubRoutes := app.Group("/users")
 	// unAuthenticated routes
-	app.Post("/register", handler.Register)
-	app.Post("/login", handler.Login)
+	pubRoutes.Post("/register", handler.Register)
+	pubRoutes.Post("/login", handler.Login)
+
+	pvtRoutes := pubRoutes.Group("/", r.Auth.Authorized)
 
 	// Authenticated routes
-	app.Get("/verify", handler.getVerificationCode)
-	app.Post("/verify", handler.verification)
-	app.Post("/profile", handler.CreateProfile)
-	app.Get("/profile", handler.getVerificationCode)
+	pvtRoutes.Get("/verify", handler.getVerificationCode)
+	pvtRoutes.Post("/verify", handler.verification)
+	pvtRoutes.Post("/profile", handler.CreateProfile)
+	pvtRoutes.Get("/profile", handler.GetProfile)
 
-	app.Post("/cart", handler.AddToCart)
-	app.Get("/cart", handler.GetCart)
-	app.Get("/order", handler.GetOrders)
-	app.Get("/orde/:id", handler.GetOrder)
+	pvtRoutes.Post("/cart", handler.AddToCart)
+	pvtRoutes.Get("/cart", handler.GetCart)
+	pvtRoutes.Get("/order", handler.GetOrders)
+	pvtRoutes.Get("/orde/:id", handler.GetOrder)
 
-	app.Post("/become-seller", handler.BecomeSeller)
+	pvtRoutes.Post("/become-seller", handler.BecomeSeller)
 
 }
 
@@ -60,7 +63,8 @@ func (u *UserRoute) Register(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": token,
+		"message": "Login successful",
+		"token":   token,
 	})
 }
 

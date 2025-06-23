@@ -115,16 +115,23 @@ func (a Auth) VerifyToken(token string) (domain.User, error) {
 }
 
 func (a Auth) Authorized(ctx *fiber.Ctx) error {
+	authHeader := ctx.Get("Authorization")
 
-	authHeader := ctx.GetReqHeaders()["Authorization"]
-	user, err := a.VerifyToken(authHeader[0])
+	if authHeader == "" {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Unauthorized",
+			"error":   "Authorization header is missing",
+		})
+	}
+
+	user, err := a.VerifyToken(authHeader)
 
 	if err == nil && user.ID > 0 {
 		ctx.Locals("user", user)
 		return ctx.Next()
 	}
 
-	return ctx.Status(401).JSON(fiber.Map{
+	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 		"message": "Unauthorized",
 		"error":   err.Error(),
 	})
