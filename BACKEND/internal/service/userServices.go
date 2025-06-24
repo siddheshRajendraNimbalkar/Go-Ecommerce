@@ -66,7 +66,18 @@ func (s UserService) Login(email string, password string) (string, error) {
 	return s.Auth.GenerateToken(user.ID, user.Email, user.UserType)
 }
 
+func (s UserService) isVeriyfied(id uint) bool {
+
+	user, err := s.Repo.FindUserById(id)
+
+	return err == nil && user.Verified
+}
+
 func (s UserService) GetVerificationCode(e domain.User) (int, error) {
+
+	if s.isVeriyfied(e.ID) {
+		return 0, nil
+	}
 
 	return 0, nil
 }

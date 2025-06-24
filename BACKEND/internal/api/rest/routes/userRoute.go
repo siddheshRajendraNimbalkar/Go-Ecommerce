@@ -93,8 +93,12 @@ func (u *UserRoute) Login(ctx *fiber.Ctx) error {
 
 func (u *UserRoute) getVerificationCode(ctx *fiber.Ctx) error {
 
+	user := u.svc.Auth.GetCurrentUser(ctx)
+
+	// create a verification code to update the user profile in DB
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "getVerificationCode",
+		"message": "getVerificationCode " + user.Email,
 	})
 }
 
@@ -114,8 +118,11 @@ func (u *UserRoute) CreateProfile(ctx *fiber.Ctx) error {
 
 func (u *UserRoute) GetProfile(ctx *fiber.Ctx) error {
 
+	user := u.svc.Auth.GetCurrentUser(ctx)
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "GetProfile",
+		"user":    user,
 	})
 }
 
