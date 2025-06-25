@@ -1,8 +1,10 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/domain"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/dto"
@@ -79,7 +81,24 @@ func (s UserService) GetVerificationCode(e domain.User) (int, error) {
 		return 0, nil
 	}
 
-	return 0, nil
+	code, err := s.Auth.GetCode()
+
+	if err != nil {
+		return 0, fmt.Errorf("%v", err)
+	}
+
+	user := domain.User{
+		Code:   fmt.Sprintf("%d", code),
+		Expire: time.Now().Add(30 * time.Minute),
+	}
+
+	_, err = s.Repo.UpdateUser(e.ID, user)
+
+	if err != nil {
+		return 0, errors.New("unable to update verification code")
+	}
+
+	return code, nil
 }
 
 func (s UserService) VerifyCode(id uint, code int) error {

@@ -96,9 +96,18 @@ func (u *UserRoute) getVerificationCode(ctx *fiber.Ctx) error {
 	user := u.svc.Auth.GetCurrentUser(ctx)
 
 	// create a verification code to update the user profile in DB
+	code, err := u.svc.GetVerificationCode(user)
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Error while geting code",
+			"error":   err,
+		})
+	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "getVerificationCode " + user.Email,
+		"message": "getVerificationCode",
+		"code":    code,
 	})
 }
 

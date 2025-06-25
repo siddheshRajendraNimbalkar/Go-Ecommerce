@@ -22,5 +22,5 @@ func RandomNumbers(length int) (int, error) {
 		buffer[i] = numbers[int(buffer[i])%numLength]
 	}
 
-	return strconv.Atoi(string(buffer)) 
+	return strconv.Atoi(string(buffer))
 }
