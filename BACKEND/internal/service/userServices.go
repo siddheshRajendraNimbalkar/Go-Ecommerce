@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/domain"
@@ -78,7 +79,7 @@ func (s UserService) isVeriyfied(id uint) bool {
 func (s UserService) GetVerificationCode(e domain.User) (int, error) {
 
 	if s.isVeriyfied(e.ID) {
-		return 0, nil
+		return 0, errors.New("user already verified")
 	}
 
 	code, err := s.Auth.GetCode()
@@ -102,6 +103,37 @@ func (s UserService) GetVerificationCode(e domain.User) (int, error) {
 }
 
 func (s UserService) VerifyCode(id uint, code int) error {
+
+	if s.isVeriyfied(id) {
+		return errors.New("user already verified")
+	}
+
+	user, err := s.Repo.FindUserById(id)
+
+	if err != nil {
+		return errors.New("Error While Finfing User")
+	}
+	// Convert user.Code (string) to int for comparison
+	userCodeInt, err := strconv.Atoi(user.Code)
+	if err != nil {
+		return errors.New("invalid code format")
+	}
+	if code != userCodeInt {
+		return errors.New("verification code does not match")
+	}
+
+	if !time.Now().Before(user.Expire) {
+		return errors.New("verification code expire")
+	}
+
+	updateUser := domain.User{
+		Verified: true,
+	}
+
+	_, err = s.Repo.UpdateUser(id, updateUser)
+	if err != nil {
+		return errors.New("Unable to verify user")
+	}
 
 	return nil
 }

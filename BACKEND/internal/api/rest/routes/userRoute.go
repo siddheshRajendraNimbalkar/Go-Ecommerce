@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/api/rest"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/dto"
@@ -100,7 +102,7 @@ func (u *UserRoute) getVerificationCode(ctx *fiber.Ctx) error {
 
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Error while geting code",
+			"message": "Error while getting code",
 			"error":   err,
 		})
 	}
@@ -113,8 +115,27 @@ func (u *UserRoute) getVerificationCode(ctx *fiber.Ctx) error {
 
 func (u *UserRoute) verification(ctx *fiber.Ctx) error {
 
+	user := u.svc.Auth.GetCurrentUser(ctx)
+
+	var req dto.VerifyCodeInput
+
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "please provide verification code",
+		})
+	}
+
+	err := u.svc.VerifyCode(user.ID, req.Code)
+
+	if err != nil {
+		mess := fmt.Sprintf("%v", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": mess,
+		})
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "verification",
+		"message": "verification done successfuly",
 	})
 }
 
