@@ -12,7 +12,6 @@ import (
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/dto"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/helper"
 	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/internal/repository"
-	"github.com/siddheshRajendraNimbalkar/Go-Ecommerce/BACKEND/pkg/notification"
 )
 
 type UserService struct {
@@ -96,17 +95,15 @@ func (s UserService) GetVerificationCode(e domain.User) (int, error) {
 		Expire: time.Now().Add(30 * time.Minute),
 	}
 
-	udatedUser, err := s.Repo.UpdateUser(e.ID, user)
+	_, err = s.Repo.UpdateUser(e.ID, user)
 
 	if err != nil {
 		return 0, errors.New("unable to update verification code")
 	}
 
-	fmt.Println(udatedUser.Phone)
-
-	mes := fmt.Sprintf("Verification code: %v", code)
-	notification := notification.NewNotificationClient(s.Config)
-	notification.SendSMS(udatedUser.Phone, mes)
+	// mes := fmt.Sprintf("Verification code: %v", code)
+	// notification := notification.NewNotificationClient(s.Config)
+	// notification.SendSMS(udatedUser.Phone, mes)
 
 	return code, nil
 }
