@@ -36,9 +36,10 @@ func NewServer(config configs.Config) *Server {
 	auth := helper.NewAuth(config.AppSecret)
 
 	r := rest.RestRoutes{
-		App:  fiberApp,
-		DB:   db,
-		Auth: auth,
+		App:    fiberApp,
+		DB:     db,
+		Auth:   auth,
+		Config: config,
 	}
 
 	SetupRoutes(&r)
