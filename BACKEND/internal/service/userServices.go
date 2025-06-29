@@ -117,7 +117,7 @@ func (s UserService) VerifyCode(id uint, code int) error {
 	user, err := s.Repo.FindUserById(id)
 
 	if err != nil {
-		return errors.New("Error While Finfing User")
+		return errors.New("error while finding user")
 	}
 	// Convert user.Code (string) to int for comparison
 	userCodeInt, err := strconv.Atoi(user.Code)
@@ -138,7 +138,7 @@ func (s UserService) VerifyCode(id uint, code int) error {
 
 	_, err = s.Repo.UpdateUser(id, updateUser)
 	if err != nil {
-		return errors.New("Unable to verify user")
+		return errors.New("unable to verify user")
 	}
 
 	return nil
