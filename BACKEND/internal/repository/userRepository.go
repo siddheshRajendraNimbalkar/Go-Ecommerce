@@ -14,10 +14,22 @@ type UserRepository interface {
 	FindUser(email string) (domain.User, error)
 	FindUserById(id uint) (domain.User, error)
 	UpdateUser(id uint, user domain.User) (domain.User, error)
+
+	// BANK ACCOUNT
+	CreateBankAccount(e domain.BankAccount) error
 }
 
 type userRepository struct {
 	db *gorm.DB
+}
+
+func (r userRepository) CreateBankAccount(e domain.BankAccount) error {
+	err := r.db.Create(&e).Error
+	if err != nil {
+		log.Println("[ERROR_IN_BANK_REPOSITORY]", err)
+		return errors.New("error while creating bank account")
+	}
+	return nil
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -73,7 +85,6 @@ func (r userRepository) UpdateUser(id uint, u domain.User) (domain.User, error) 
 		return domain.User{}, errors.New("error while updating user")
 	}
 
-	// Fetch the updated user
 	err = r.db.First(&user, id).Error
 	if err != nil {
 		log.Println("[ERROR IN REPOSITORY] Error while fetching updated user:", err)

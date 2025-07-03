@@ -31,8 +31,10 @@ func NewServer(config configs.Config) *Server {
 	log.Printf("Connected to database successfully")
 
 	// Migrate the schema
-	db.AutoMigrate(&domain.User{})
-
+	err = db.AutoMigrate(&domain.User{}, &domain.BankAccount{})
+	if err != nil {
+		log.Fatalf("Failed to migrate database schema: %v", err)
+	}
 	auth := helper.NewAuth(config.AppSecret)
 
 	r := rest.RestRoutes{

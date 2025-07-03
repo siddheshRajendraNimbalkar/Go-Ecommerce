@@ -159,9 +159,54 @@ func (s UserService) UpdateProfile(id uint, input any) error {
 	return nil
 }
 
-func (s UserService) BecomeSeller(id uint, input any) (string, error) {
+func (s UserService) BecomeSeller(id uint, input dto.SellerInput) (string, error) {
 
-	return "", nil
+	// Check if user is already a seller
+
+	user, err := s.Repo.FindUserById(id)
+	if err != nil {
+		log.Println("[ERROR IN SERVICE] Error while finding user by ID:", err)
+		return "", fmt.Errorf("error while finding user by ID: %w", err)
+	}
+	if user.UserType == domain.SELLER {
+		return "", errors.New("user is already a seller")
+	}
+
+	// Update user type to seller
+	updateUser := domain.User{
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		UserType:  domain.SELLER,
+	}
+
+	updateUser, err = s.Repo.UpdateUser(id, updateUser)
+	if err != nil {
+		log.Println("[ERROR IN SERVICE] Error while updating user to seller:", err)
+		return "", fmt.Errorf("error while updating user to seller: %w", err)
+	}
+
+	// generate token for seller
+	token, err := s.Auth.GenerateToken(updateUser.ID, updateUser.Email, updateUser.UserType)
+	if err != nil {
+		log.Println("[ERROR IN SERVICE] Error while generating token for seller:", err)
+		return "", fmt.Errorf("error while generating token for seller: %w", err)
+	}
+
+	// Create bank account for seller
+	bankAccount := domain.BankAccount{
+		BankAccount: uint(input.BankAccountNumber),
+		SwiftCode:   input.SwiftCode,
+		PaymentType: input.PaymetType,
+		UserID:      updateUser.ID,
+	}
+
+	err = s.Repo.CreateBankAccount(bankAccount)
+	if err != nil {
+		log.Println("[ERROR IN SERVICE] Error while creating bank account for seller:", err)
+		return "", fmt.Errorf("error while creating bank account for seller: %w", err)
+	}
+
+	return token, nil
 }
 
 func (s UserService) FindCart(id uint) ([]interface{}, error) {

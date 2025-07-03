@@ -194,7 +194,27 @@ func (u *UserRoute) GetOrder(ctx *fiber.Ctx) error {
 
 func (u *UserRoute) BecomeSeller(ctx *fiber.Ctx) error {
 
+	user := u.svc.Auth.GetCurrentUser(ctx)
+
+	req := dto.SellerInput{}
+
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.Status(400).JSON(&fiber.Map{
+			"message": "Invalid input data",
+		})
+	}
+
+	token, err := u.svc.BecomeSeller(user.ID, req)
+
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "BecomeSeller",
+		"message": "Be The Seller",
+		"token":   token,
 	})
 }
